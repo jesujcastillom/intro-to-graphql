@@ -10,3 +10,41 @@ enum BikeType {
   ELECTRIC
   BEACH
 }
+
+input NewProductInput {
+  name: String!
+  price: Float!
+  bikeType: BikeType
+  type: ProductType!
+  image: String!
+}
+
+input UpdateProductInput {
+  name: String
+  price: String
+  bikeType: BikeType
+  image: String
+}
+
+type Product {
+  price: Float!
+  name: String!
+  image: String!
+  range: String
+  liquidCooled: Boolean
+  bikeType: BikeType
+  type: ProductType!
+  description: String
+  createdBy: User!
+}
+
+extend type Mutation{
+  newProduct(input: NewProductInput!): Product
+  updateProduct(id: ID!, input: UpdateProductInput!): Product
+  removeProduct(id: ID!): Product
+}
+
+extend type Query{
+  product(id: ID!): Product
+  products: [Product]!
+}
