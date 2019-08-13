@@ -9,33 +9,49 @@ const productsTypeMatcher = {
   DRONE: 'Drone'
 }
 
+const authorized = user => {
+  if (!user) {
+    throw new AuthenticationError();
+  }
+}
+
+const adminRole = user => {
+  authorized(user);
+  if (user.role !== 'admin') {
+    throw new AuthenticationError();
+  }
+}
+
 /** product */
-const product = (_, args, ctx) => {
+const product = (_, args, { user }) => {
+  authorized(user);
   return Product.findById(args.id)
     .lean()
     .exec()
 }
 
-const newProduct = (_, args, ctx) => {
-  // use this fake ID for createdBy for now until we talk auth
-  const createdBy = mongoose.Types.ObjectId()
-  return Product.create({ ...args.input, createdBy })
+const newProduct = (_, args, { user }) => {
+  adminRole(user);
+  return Product.create({ ...args.input, createdBy: user._id })
 }
 
-const products = (_, args, ctx) => {
+const products = (_, args, { user }) => {
+  authorized(user);
   return Product.find({})
     .lean()
     .exec()
 }
 
-const updateProduct = (_, args, ctx) => {
+const updateProduct = (_, args, { user }) => {
+  adminRole(user);
   const update = args.input
   return Product.findByIdAndUpdate(args.id, update, { new: true })
     .lean()
     .exec()
 }
 
-const removeProduct = (_, args, ctx) => {
+const removeProduct = (_, args, { user }) => {
+  adminRole(user);
   return Product.findByIdAndRemove(args.id)
     .lean()
     .exec()
